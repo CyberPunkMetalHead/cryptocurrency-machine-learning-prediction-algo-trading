@@ -11,7 +11,8 @@ For a detailed explanation of how the machine learning trading bot works in deta
 2. Install Visual studio 2022 or similar
 3. Run dotnet restore
 4. Configure your bot in the config.json.example file and remove .example once finished adding your api key, secret, buy amount and whether the bot should start in test more or not.
-5. Run Program.cs
+5. Build the application (Ctrl+Shift+B)
+6. Run the app from within Visual Studio or run the executable in "projectDirectory/bin/Debug/net6.0/CryptoPricePrediction.exe"
 
 ####  Considerations
 By default, the bot will place test orders. Use the config.json.example file in order to switch to live trading or to modify the amount bought per trade.
