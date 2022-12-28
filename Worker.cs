@@ -1,5 +1,8 @@
 using CryptoPricePrediction.Models;
 using CryptoPricePrediction.Services;
+using System.Text;
+using CryptoPricePrediction.Utils;
+using Microsoft.Extensions.Options;
 
 namespace CryptoPricePrediction
 {
@@ -16,9 +19,32 @@ namespace CryptoPricePrediction
         {
             TradeService tradeService = new();
             PriceService priceService = new();
+            Util utils = new();
+
+            Root configOptions = utils.LoadJson();
+            string logPath = AppDomain.CurrentDomain.BaseDirectory + "../../../Logs/";
+
+            if(configOptions.Settings.TestMode)
+            {
+                Console.WriteLine("Starting in Test Mode, trade logs will be dropped in the Logs Folder.");
+            }
+            else
+            {
+                Console.WriteLine("NOTE: You are about to start LIVE TRADING USING REAL FUNDS. App will Start Executing in 30 seconds.");
+                Thread.Sleep(2000);
+
+                for (int i = 30; i >= 0; i--)
+                {
+                    if(stoppingToken.IsCancellationRequested) { continue; }
+                    Console.WriteLine($"You have {i} seconds to stop the application using Ctrl + C. ");
+                    Thread.Sleep(1000);
+                    Console.Clear();
+                }
+            }
 
             while (!stoppingToken.IsCancellationRequested)
             {
+
                 KlineResponse currentKline = await priceService.GetPrices();
 
                 if(currentKline == null) continue;
@@ -33,43 +59,40 @@ namespace CryptoPricePrediction
 
                 //Load model and predict output
                 var prediction  = PricePrediction.Predict(klineOpenValue).Score;
+                StringBuilder sb = new StringBuilder();
 
                 if (prediction < openPrice)
                 {
-                    Console.WriteLine("Prediction is smaller than the open price, skipping buy and awaiting new prediction");
+                    File.AppendAllText(logPath + $"{DateTime.Now.Date.ToLongDateString()}.txt", $"{DateTime.Now} Prediction ({prediction}) is smaller than the open price ({openPrice}), skipping buy and awaiting new prediction \n");
                     Thread.Sleep(1000 * 3600);
                     continue;
                 }
 
-                //await tradeService.BuyBTC(50);
-                await tradeService.TestBuyBTC(50);
+                await tradeService.BuyBTC();
 
-                DateTime now = DateTime.Now;
-                Console.WriteLine($"{DateTime.Now} Buying BTCUSDT. Current price is {closePrice}, predicted High is {prediction}. Working...");
+               DateTime now = DateTime.Now;
+               File.AppendAllText(logPath + $"{now.Date.ToLongDateString()}.txt", $"{now} Buying BTCUSDT. Current price is {closePrice}, predicted High is {prediction}. Working... \n");
 
-                while(now < now.AddHours(1))
+                while (now < now.AddHours(1))
                 {
                     KlineResponse latestPriceChecker = await priceService.GetPrices();
                     var latestPrice = Convert.ToDouble(latestPriceChecker.ClosePrice);
 
                     if (latestPrice >= prediction)
                     {
-                        Console.WriteLine($"{DateTime.Now} Prediction reached, closing trade, taking profit. Predicted value was {prediction}, price reached is {latestPrice}.");
+                        File.AppendAllText(logPath+$"{now.Date.ToLongDateString()}.txt", $"{DateTime.Now} Prediction reached, taking profit. Predicted value was {prediction}, price reached is {latestPrice}. PnL is {(latestPrice - openPrice)/openPrice*100} \n");
                         
-                        //await tradeService.SellBTC(50);
-                        await tradeService.TestSellBTC(50);
-
+                        await tradeService.SellBTC();
                     }
 
                     Thread.Sleep(1000);
                     //Console.WriteLine($"{DateTime.Now} current price is {latestPrice}");
                 }
-
-                Console.WriteLine($"{DateTime.Now} model efficiency lost, selling previously bought BTC");
+                KlineResponse sellPriceChecker = await priceService.GetPrices();
+                var sellPrice = Convert.ToDouble(sellPriceChecker.ClosePrice);
+                File.AppendAllText(logPath + $"{now.Date.ToLongDateString()}.txt", $"{DateTime.Now} model efficiency lost, selling bought BTC. PnL is {(sellPrice - openPrice) / openPrice * 100} \n");
                 
-                //await tradeService.SellBTC(50);
-                await tradeService.TestSellBTC(50);
-
+                await tradeService.SellBTC();
 
             }
         }

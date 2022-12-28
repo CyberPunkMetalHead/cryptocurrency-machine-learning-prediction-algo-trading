@@ -3,57 +3,78 @@ using Binance.Net.Enums;
 using Binance.Net.Objects;
 using CryptoExchange.Net.Authentication;
 using CryptoExchange.Net.Objects;
+using CryptoPricePrediction.Models;
+using CryptoPricePrediction.Utils;
+
 
 namespace CryptoPricePrediction.Services
 {
     public class TradeService
     {
+        Util utils = new();
+        public string? apiKey;
+        public string? secret;
+        public int amount;
+        public bool testMode;
+        BinanceClient client;
 
-        public BinanceClient binanceClient = new BinanceClient(new BinanceClientOptions
-        {
-            ApiCredentials = new ApiCredentials("YOUR_API_KEY","YOUR_API_SECRET"),
-            SpotApiOptions = new BinanceApiClientOptions
+        public TradeService() {
+
+            Root config = utils.LoadJson()!;
+            apiKey = config.Authentication.Key;
+            secret = config.Authentication.Secret;
+            amount = config.Settings.BuyAmount;
+            testMode = config.Settings.TestMode;
+            client = new BinanceClient(new BinanceClientOptions
             {
-                BaseAddress = "https://api.binance.com/",
-                RateLimitingBehaviour = RateLimitingBehaviour.Fail
-            },
-        });
+                ApiCredentials = new ApiCredentials(apiKey, secret),
+                SpotApiOptions = new BinanceApiClientOptions
+                {
+                    BaseAddress = "https://api.binance.com/",
+                    RateLimitingBehaviour = RateLimitingBehaviour.Fail
+                },
+            });
+        }
 
-        public async Task BuyBTC(int quantity)
+        public async Task BuyBTC()
         {
-            var orderData = await binanceClient.SpotApi.Trading.PlaceOrderAsync(
+            if (testMode)
+            {
+                await client.SpotApi.Trading.PlaceTestOrderAsync("BTCUSDT",
+                OrderSide.Buy,
+                SpotOrderType.Market,
+                quoteQuantity: amount);
+            }
+
+            else
+            {
+                await client.SpotApi.Trading.PlaceOrderAsync(
                 "BTCUSDT",
                 OrderSide.Buy,
                 SpotOrderType.Market,
-                quoteQuantity: quantity);
-
+                quoteQuantity: amount);
+            }
         }
 
-
-        public async Task SellBTC(int quantity)
+        public async Task SellBTC()
         {
-            var orderData = await binanceClient.SpotApi.Trading.PlaceOrderAsync(
+
+            if (testMode)
+            {
+               await client.SpotApi.Trading.PlaceTestOrderAsync("BTCUSDT",
+                OrderSide.Sell,
+                SpotOrderType.Market,
+                quoteQuantity: amount);
+            }
+
+            else
+            {
+                await client.SpotApi.Trading.PlaceOrderAsync(
                 "BTCUSDT",
                 OrderSide.Sell,
                 SpotOrderType.Market,
-                quoteQuantity: quantity);
+                quoteQuantity: amount);
+            }
         }
-
-        public async Task TestBuyBTC(int quantity)
-        {
-            var result = await binanceClient.SpotApi.Trading.PlaceTestOrderAsync("BTCUSDT",
-                OrderSide.Buy,
-                SpotOrderType.Market,
-                quoteQuantity: quantity);
-        }
-
-        public async Task TestSellBTC(int quantity)
-        {
-            var result = await binanceClient.SpotApi.Trading.PlaceTestOrderAsync("BTCUSDT",
-                OrderSide.Sell,
-                SpotOrderType.Market,
-                quoteQuantity: quantity);
-        }
-
     }
 }

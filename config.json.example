@@ -1,0 +1,10 @@
+{
+  "Authentication": {
+    "Key": "Key",
+    "Secret": "Secret"
+  },
+  "Settings": {
+    "BuyAmount": 50,
+    "TestMode":  true
+  }
+}

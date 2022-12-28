@@ -10,6 +10,9 @@ CHECKLIST.md
 *.userosscache
 *.sln.docstates
 .vscode/
+*.dll
+config.json
+Logs/
 
 
 # User-specific files (MonoDevelop/Xamarin Studio)
