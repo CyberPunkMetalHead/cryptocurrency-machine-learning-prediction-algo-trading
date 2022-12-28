@@ -2,25 +2,20 @@
 
 This is a functional trading algorithm that aims to predict the price of Bitcoin within the next hour, and places trades based on its prediction. The model was trained on 1 hour candlestick data for the Open and High price and its job is to take the new Open price for Bitcoin, and predict the likely high price for the next hour.
 
-Detailed explanation of how the machine learning trading bot works in detail.
+For a detailed explanation of how the machine learning trading bot works in detail and how it was built see [this article](https://cryptomaton.medium.com/i-built-a-trading-algorithm-that-predicts-the-price-of-bitcoin-854258295a3f)
+
 
 
 #### How to use the ML Bitcoin Trading Bot
 1. Clone this repository
 2. Install Visual studio 2022 or similar
 3. Run dotnet restore
-4. Add your Binance API_KEY and API_SECRET inside the Binance client in TradeService.cs
+4. Configure your bot in the config.json.example file and remove .example once finished adding your api key, secret, buy amount and whether the bot should start in test more or not.
 5. Run Program.cs
 
 ####  Considerations
-By default, the bot will place test orders. To enable live trading, replace all instances of:
-                          
-    await tradeService.TestSellBTC(50);
-
-with:
-
-      //await tradeService.SellBTC(50);
-The bot will now aim to Buy or Sell 50 USDT worth of bitcoin for each cycle.
+By default, the bot will place test orders. Use the config.json.example file in order to switch to live trading or to modify the amount bought per trade.
+Daily logs are dropped in the "Logs" directory. 
 
 #### Disclaimer
 Use this at your own risk and peril. The tool works (functionally) but the efficiency of this strategy hasn't been tested.
@@ -28,6 +23,4 @@ Use this at your own risk and peril. The tool works (functionally) but the effic
 #### Missing features
 This is just a quick proof of concept and could be fleshed out. I may add some more functionality in the future, but if you want to contribute by making a pull request here are some features that you can add to the tool:
 
- - Creates and updates a log file. All the logs are currently dumped in the console.
  - Creating models for the Binance Kline response, to avoid converting / casting.
- - Create a config file where the API keys and trade amount can live.
