@@ -2,7 +2,7 @@
 
 This is a functional trading algorithm that aims to predict the price of Bitcoin within the next hour, and places trades based on its prediction. The model was trained on 1 hour candlestick data for the Open and High price and its job is to take the new Open price for Bitcoin, and predict the likely high price for the next hour.
 
-For a detailed explanation of how the machine learning trading bot works in detail and how it was built see [this article](https://cryptomaton.medium.com/i-built-a-trading-algorithm-that-predicts-the-price-of-bitcoin-854258295a3f)
+** For a detailed explanation of how the machine learning trading bot works in detail and how it was built see [this article on my blog](https://cryptomaton.medium.com/i-built-a-trading-algorithm-that-predicts-the-price-of-bitcoin-854258295a3f) **
 
 
 
