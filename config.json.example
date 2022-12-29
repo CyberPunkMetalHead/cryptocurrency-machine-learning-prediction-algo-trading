@@ -1,7 +1,7 @@
 {
   "Authentication": {
-    "Key": "Key",
-    "Secret": "Secret"
+    "Key": "key",
+    "Secret": "secret"
   },
   "Settings": {
     "BuyAmount": 50,
