@@ -83,6 +83,7 @@ namespace CryptoPricePrediction
                         File.AppendAllText(logPath+$"{now.Date.ToLongDateString()}.txt", $"{DateTime.Now} Prediction reached, taking profit. Predicted value was {prediction}, price reached is {latestPrice}. PnL is {(latestPrice - openPrice)/openPrice*100} \n");
                         
                         await tradeService.SellBTC();
+                        continue;
                     }
 
                     Thread.Sleep(1000);
