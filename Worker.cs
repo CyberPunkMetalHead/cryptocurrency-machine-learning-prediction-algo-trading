@@ -22,7 +22,7 @@ namespace CryptoPricePrediction
             Util utils = new();
 
             Root configOptions = utils.LoadJson();
-            string logPath = AppDomain.CurrentDomain.BaseDirectory + "Logs/";
+            string logPath = AppDomain.CurrentDomain.BaseDirectory + "../../../Logs/";
 
             if(configOptions.Settings.TestMode)
             {

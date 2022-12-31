@@ -17,7 +17,7 @@ namespace CryptoPricePrediction.Utils
 
         public Root? LoadJson()
         {
-            string filePath = AppDomain.CurrentDomain.BaseDirectory + "config.json";
+            string filePath = AppDomain.CurrentDomain.BaseDirectory + "../../../config.json";
 
             using (StreamReader r = new StreamReader(filePath))
             {
