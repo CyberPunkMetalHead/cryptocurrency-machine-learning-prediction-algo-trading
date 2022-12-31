@@ -22,7 +22,7 @@ namespace CryptoPricePrediction
             Util utils = new();
 
             Root configOptions = utils.LoadJson();
-            string logPath = AppDomain.CurrentDomain.BaseDirectory + "../../../Logs/";
+            string logPath = AppDomain.CurrentDomain.BaseDirectory + "Logs/";
 
             if(configOptions.Settings.TestMode)
             {
@@ -83,7 +83,7 @@ namespace CryptoPricePrediction
                         File.AppendAllText(logPath+$"{now.Date.ToLongDateString()}.txt", $"{DateTime.Now} Prediction reached, taking profit. Predicted value was {prediction}, price reached is {latestPrice}. PnL is {(latestPrice - openPrice)/openPrice*100} \n");
                         
                         await tradeService.SellBTC();
-                        continue;
+                        break;
                     }
 
                     Thread.Sleep(1000);
