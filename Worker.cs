@@ -50,6 +50,7 @@ namespace CryptoPricePrediction
                 if(currentKline == null) continue;
                 var closePrice = Convert.ToDouble(currentKline.ClosePrice);
                 var openPrice = Convert.ToDouble(currentKline.OpenPrice);
+                var sold = false;
 
                 //Load sample data
                 var klineOpenValue = new PricePrediction.ModelInput()
@@ -61,9 +62,9 @@ namespace CryptoPricePrediction
                 var prediction  = PricePrediction.Predict(klineOpenValue).Score;
                 StringBuilder sb = new StringBuilder();
 
-                if (prediction < openPrice)
+                if (prediction < openPrice || prediction < closePrice)
                 {
-                    File.AppendAllText(logPath + $"{DateTime.Now.Date.ToLongDateString()}.txt", $"{DateTime.Now} Prediction ({prediction}) is smaller than the open price ({openPrice}), skipping buy and awaiting new prediction \n");
+                    File.AppendAllText(logPath + $"{DateTime.Now.Date.ToLongDateString()}.txt", $"{DateTime.Now} Prediction ({prediction}) is smaller than the open ({openPrice}) or current ({closePrice}) price, skipping buy and awaiting new prediction \n");
                     Thread.Sleep(1000 * 3600);
                     continue;
                 }
@@ -83,6 +84,7 @@ namespace CryptoPricePrediction
                         File.AppendAllText(logPath+$"{now.Date.ToLongDateString()}.txt", $"{DateTime.Now} Prediction reached, taking profit. Predicted value was {prediction}, price reached is {latestPrice}. PnL is {(latestPrice - openPrice)/openPrice*100} \n");
                         
                         await tradeService.SellBTC();
+                        sold = true;
                         break;
                     }
 
@@ -91,9 +93,13 @@ namespace CryptoPricePrediction
                 }
                 KlineResponse sellPriceChecker = await priceService.GetPrices();
                 var sellPrice = Convert.ToDouble(sellPriceChecker.ClosePrice);
-                File.AppendAllText(logPath + $"{now.Date.ToLongDateString()}.txt", $"{DateTime.Now} model efficiency lost, selling bought BTC. PnL is {(sellPrice - openPrice) / openPrice * 100} \n");
-                
-                await tradeService.SellBTC();
+
+                if (sold == false)
+                {
+                    File.AppendAllText(logPath + $"{now.Date.ToLongDateString()}.txt", $"{DateTime.Now} model efficiency lost, selling bought BTC. PnL is {(sellPrice - openPrice) / openPrice * 100} \n");
+                    await tradeService.SellBTC();
+
+                }
 
             }
         }
