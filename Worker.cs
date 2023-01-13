@@ -71,22 +71,25 @@ namespace CryptoPricePrediction
 
                 await tradeService.BuyBTC();
 
-               DateTime now = DateTime.Now;
-               File.AppendAllText(logPath + $"{now.Date.ToLongDateString()}.txt", $"{now} Buying BTCUSDT. Current price is {closePrice}, predicted High is {prediction}. Working... \n");
+               DateTime candleStart = DateTime.Now;
+               DateTime currentTime = DateTime.Now;
 
-                while (now < now.AddHours(1))
+                File.AppendAllText(logPath + $"{currentTime.Date.ToLongDateString()}.txt", $"{DateTime.Now} Buying BTCUSDT. Current price is {closePrice}, predicted High is {prediction}. Working... \n");
+
+                while (currentTime < candleStart.AddHours(1))
                 {
                     KlineResponse latestPriceChecker = await priceService.GetPrices();
                     var latestPrice = Convert.ToDouble(latestPriceChecker.ClosePrice);
 
                     if (latestPrice >= prediction)
                     {
-                        File.AppendAllText(logPath+$"{now.Date.ToLongDateString()}.txt", $"{DateTime.Now} Prediction reached, taking profit. Predicted value was {prediction}, price reached is {latestPrice}. PnL is {(latestPrice - openPrice)/openPrice*100} \n");
+                        File.AppendAllText(logPath+$"{currentTime.Date.ToLongDateString()}.txt", $"{DateTime.Now} Prediction reached, taking profit. Predicted value was {prediction}, price reached is {latestPrice}. PnL is {(latestPrice - openPrice)/openPrice*100} \n");
                         
                         await tradeService.SellBTC();
                         sold = true;
                         break;
                     }
+                    currentTime = DateTime.Now;
 
                     Thread.Sleep(1000);
                     //Console.WriteLine($"{DateTime.Now} current price is {latestPrice}");
@@ -96,7 +99,7 @@ namespace CryptoPricePrediction
 
                 if (sold == false)
                 {
-                    File.AppendAllText(logPath + $"{now.Date.ToLongDateString()}.txt", $"{DateTime.Now} model efficiency lost, selling bought BTC. PnL is {(sellPrice - openPrice) / openPrice * 100} \n");
+                    File.AppendAllText(logPath + $"{currentTime.Date.ToLongDateString()}.txt", $"{DateTime.Now} model efficiency lost, selling bought BTC. PnL is {(sellPrice - openPrice) / openPrice * 100} \n");
                     await tradeService.SellBTC();
 
                 }
